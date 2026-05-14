@@ -10,7 +10,8 @@ langchain-text-splitters
 langchain-core
 torchvision
 mysql-connector-python
-chromadb
+chromadb==0.4.24
+protobuf==4.25.3
 nltk
 rouge-score
 rouge
