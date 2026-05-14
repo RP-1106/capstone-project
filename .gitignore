@@ -1,4 +1,38 @@
+# Secrets — NEVER commit these
 .env
+.streamlit/secrets.toml
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# Data / outputs (large or sensitive files)
+data/users.json
+output/
+
+# ChromaDB local store
+chroma_fin_mentor/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
 /chroma_fin_mentor.env
 eval/datadigger_chatbot.py
 eval/old_finmentor_code.py

@@ -305,7 +305,15 @@ def filter_expenses(df, duration, budget_data):
         start_date = end_date - pd.DateOffset(months=3)
     elif duration == "Last 6 Months":
         start_date = end_date - pd.DateOffset(months=6)
-    else:  # Default to "Last 1 Year"
+    elif duration == "Last 2 Years":
+        start_date = end_date - pd.DateOffset(years=2)
+    elif duration == "Last 3 Years":
+        start_date = end_date - pd.DateOffset(years=3)
+    elif duration == "Last 4 Years":
+        start_date = end_date - pd.DateOffset(years=4)
+    elif duration == "Last 5 Years":
+        start_date = end_date - pd.DateOffset(years=5)
+    else:  # Last 1 Year
         start_date = end_date - pd.DateOffset(years=1)
 
     # Filter the DataFrame for expenses within the specified date range
@@ -326,8 +334,12 @@ def filter_expenses(df, duration, budget_data):
     else:
         expense_summary = expense_summary.merge(budget_df, on='Category', how='left')
         expense_summary['Budget'] *= (3 if duration == "Last 3 Months" else 
-                                    6 if duration == "Last 6 Months" else 
-                                    12)  # For Last 1 Year
+                                    6 if duration == "Last 6 Months" else
+                                    24 if duration == "Last 2 Years" else
+                                    36 if duration == "Last 3 Years" else
+                                    48 if duration == "Last 4 Years" else
+                                    60 if duration == "Last 5 Years" else
+                                    12)  # Last 1 Year
     
     return expense_summary
 
@@ -482,7 +494,8 @@ def overview():
                     height=300)
                 st.plotly_chart(income_fig, use_container_width=True)
             else:
-                print(len(income_categories))
+                st.write("")
+                st.write("")
                 st.info("No income transactions recorded for the current month.")
         
         # Container 3: Expenses Breakdown
@@ -591,7 +604,13 @@ def overview():
             grouped = df_analytics.groupby(['YearMonth', 'Category'])['Amount'].sum().unstack(fill_value=0)
 
             # Calculate % change
-            diff = ((grouped.loc[latest_month] - grouped.loc[previous_month]) / grouped.loc[previous_month]) * 100
+            if previous_month in grouped.index:
+                diff = ((grouped.loc[latest_month] - grouped.loc[previous_month]) / grouped.loc[previous_month]) * 100
+                diff = diff[~diff.isin([float('inf'), float('-inf')])]
+                top_5_diff = diff.abs().nlargest(5).index
+            else:
+                diff = pd.Series(dtype=float)
+                top_5_diff = []
         
             # Filter out categories with +inf or -inf
             diff = diff[~diff.isin([float('inf'), float('-inf')])]
@@ -600,14 +619,17 @@ def overview():
             top_5_diff = diff.abs().nlargest(5).index
 
             st.subheader("Analytics")
-            for category in top_5_diff:
-                change = diff[category]
-                if category in expense_cats:
-                    color = '#c93640' if change > 0 else '#3c9632'
-                elif category in income_cats:
-                    color = 'orange' if change < 0 else '#368ec9'
-                symbol = '+' if change > 0 else ''
-                st.markdown(f"<span style='color:{color}; font-weight:bold;'>{symbol}{change:.2f}%</span> {category}", unsafe_allow_html=True)
+            if len(top_5_diff) == 0:
+                st.info("Not enough data to calculate month-over-month changes.")
+            else:
+                for category in top_5_diff:
+                    change = diff[category]
+                    if category in expense_cats:
+                        color = '#c93640' if change > 0 else '#3c9632'
+                    elif category in income_cats:
+                        color = 'orange' if change < 0 else '#368ec9'
+                    symbol = '+' if change > 0 else ''
+                    st.markdown(f"<span style='color:{color}; font-weight:bold;'>{symbol}{change:.2f}%</span> {category}", unsafe_allow_html=True)
 
         # base budget data
         budget_data = {
@@ -645,9 +667,21 @@ def overview():
         st.write("### Expense Distribution")
 
         # Time duration selection
-        time_filter = st.selectbox("Select Duration", [
-            "Current Month", "Previous Month", "Last 3 Months", "Last 6 Months", "Last 1 Year"
-        ])
+        max_date = df['Date'].max()
+        min_date = df['Date'].min()
+        months_of_data = (max_date.year - min_date.year) * 12 + (max_date.month - min_date.month)
+
+        duration_options = ["Current Month", "Previous Month", "Last 3 Months", "Last 6 Months", "Last 1 Year"]
+        if months_of_data >= 24:
+            duration_options.append("Last 2 Years")
+        if months_of_data >= 36:
+            duration_options.append("Last 3 Years")
+        if months_of_data >= 48:
+            duration_options.append("Last 4 Years")
+        if months_of_data >= 60:
+            duration_options.append("Last 5 Years")
+
+        time_filter = st.selectbox("Select Duration", duration_options)
 
         if df is None:
             st.warning("Please upload your transaction data first from the 'Upload Data' tab.")

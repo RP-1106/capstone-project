@@ -1,81 +1,77 @@
 import streamlit as st
 import os
-from dotenv import load_dotenv
-from langchain.text_splitter import CharacterTextSplitter
+from langchain_text_splitters import CharacterTextSplitter
 from langchain_community.document_loaders import CSVLoader
 from langchain_community.vectorstores import Chroma
-from langchain.chains import RetrievalQA
-from langchain.prompts import PromptTemplate
+#from langchain_community.chains import RetrievalQA
+from langchain_core.runnables import RunnablePassthrough
+from langchain_core.output_parsers import StrOutputParser
+
+from langchain_core.prompts import PromptTemplate
 from langchain_groq import ChatGroq
 from langchain_huggingface import HuggingFaceEmbeddings
 
-# =================================================
-# 1. Initialize the Language Model with Groq API
-# =================================================
+# ============================================================
+# SECRETS: Read from st.secrets (cloud) or env vars (local)
+# ============================================================
 
-# Load environment variables from .env file
-load_dotenv()
+def get_secret(key, section=None):
+    try:
+        return st.secrets[section][key] if section else st.secrets[key]
+    except (KeyError, FileNotFoundError):
+        return os.getenv(key)
 
-def initialize_groq_model():
-    """
-    Initialize the Groq language model.
-    """
-    # Retrieve API key from environment variable
-    groq_api_key = os.getenv("GROQ_API_KEY")
-    
-    # Raise error if API key is not found
+# ============================================================
+# CACHED RESOURCES — load once, reuse across all interactions
+# ============================================================
+
+@st.cache_resource
+def load_groq_model():
+    """Load the Groq LLM once and cache it."""
+    groq_api_key = get_secret("GROQ_API_KEY")
     if not groq_api_key:
-        st.error("Please set your Groq API key in the .env file")
+        st.error("Groq API key not found. Please set GROQ_API_KEY in your secrets.")
         st.stop()
-    
-    # Initialize Groq model
-    model = ChatGroq(
+    return ChatGroq(
         groq_api_key=groq_api_key,
-        model_name="mistral-saba-24b",
-        temperature=0.1
+        model_name="llama-3.3-70b-versatile",
+        temperature=0.1,
     )
-    return model
 
-# ===================================================
-# 2. Document Preprocessing Function
-# ===================================================
+@st.cache_resource
+def load_embedding_function():
+    """Load HuggingFace embeddings once and cache them."""
+    return HuggingFaceEmbeddings(
+        model_name="sentence-transformers/all-mpnet-base-v2"
+    )
+
+# Cross-platform data path
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+def data_path(*parts):
+    return os.path.join(BASE_DIR, "data", *parts)
+
+# ============================================================
+# DOCUMENT HELPERS
+# ============================================================
 
 def docs_preprocessing_helper(file):
-    """
-    Helper function to load and preprocess a CSV file containing data.
-    """
     loader = CSVLoader(file)
     docs = loader.load()
-    # Using a smaller chunk size for faster processing
     text_splitter = CharacterTextSplitter(chunk_size=800, chunk_overlap=0)
-    docs = text_splitter.split_documents(docs)
-    return docs
+    return text_splitter.split_documents(docs)
 
-# =====================================================================
-# 3. Set up the Embedding Function and Chroma Database
-# =====================================================================
 
-embedding_function = HuggingFaceEmbeddings(
-    model_name="sentence-transformers/all-mpnet-base-v2"
-)
-
-def setup_chroma_db(docs, embedding_function):
-    """Sets up the Chroma database."""
-    # Create an in-memory Chroma database
-    db = Chroma.from_documents(
-        docs, 
-        embedding_function,
-        persist_directory=None,  # Force in-memory storage
-        collection_name="my_collection"  # Give it a specific name
+def setup_chroma_db(docs, embedding_fn):
+    """In-memory Chroma DB for the generic pre-login bot."""
+    return Chroma.from_documents(
+        docs,
+        embedding_fn,
+        collection_name="generic_bot",
     )
-    return db
 
-# =================================================================
-# 4. Define and Initialize the Prompt Template
-# =================================================================
 
 def create_prompt_template():
-    """Creates and formats the prompt template."""
     template = """You are a finance consultant chatbot. Answer the customer's questions only using the source data provided.
 Please answer to their specific questions. If you are unsure, say "I don't know, please call our customer support". Keep your answers concise.
 
@@ -83,98 +79,77 @@ Please answer to their specific questions. If you are unsure, say "I don't know,
 
 Question: {question}
 Answer:"""
-    prompt = PromptTemplate(template=template, input_variables=["context", "question"])
-    return prompt
+    return PromptTemplate(template=template, input_variables=["context", "question"])
 
-# =====================================================
-# 5. Create the Retrieval Chain
-# =====================================================
 
-def create_retrieval_chain(model, db, prompt):
-    """Creates the retrieval chain."""
-    chain_type_kwargs = {"prompt": prompt}
-    chain = RetrievalQA.from_chain_type(
-        llm=model,
-        chain_type="stuff",
-        retriever=db.as_retriever(search_kwargs={"k": 1}),
-        chain_type_kwargs=chain_type_kwargs,
+def create_retrieval_chain(llm, db, prompt):
+    retriever = db.as_retriever(search_kwargs={"k": 1})
+    chain = (
+        {"context": retriever, "question": RunnablePassthrough()}
+        | prompt
+        | llm
+        | StrOutputParser()
     )
     return chain
 
-# =================================
-# 6. Query the chain and output the response
-# =================================
-
 def query_chain(chain, query):
-    """Queries the chain and returns the response."""
-    response = chain.invoke(query)
-    return response['result']
+    return chain.invoke(query)
+# ============================================================
+# STREAMLIT PAGE
+# ============================================================
 
 def bot_page():
-    """Bot section of the landing page"""
-
-    # CSS
+    """Bot section of the landing page."""
     st.markdown("""
     <style>
-    * {
-        font-family: Verdana, sans-serif !important;
-    }
-    /* Make assistant responses white text */
-    [data-testid="stChatMessageContent"] {
-        color: white !important;
-    }
-    /* Make assistant responses white text */
-    [data-testid="stChatMessageContent"] {
-        color: white !important;
-    }
+    * { font-family: Verdana, sans-serif !important; }
+    [data-testid="stChatMessageContent"] { color: white !important; }
     </style>
     """, unsafe_allow_html=True)
-    
+
     st.markdown("""
-    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: -20px; margin-top: -10px">
-      <h3 style="margin: 0;">Let our bot help you with your queries!</h3>
+    <div style="display:flex;align-items:center;gap:15px;margin-bottom:-20px;margin-top:-10px">
+      <h3 style="margin:0;">Let our bot help you with your queries!</h3>
     </div>
     """, unsafe_allow_html=True)
-    
-    # Initialize session state for messages
+
     if "messages" not in st.session_state:
         st.session_state.messages = []
-    
-    # Only load and process documents once
+
+    # Load model + chain once per session
     if "chain" not in st.session_state:
         with st.spinner("Loading model and data (this will only happen once)..."):
-            file_path = "data/generic.csv"
-            
-            # Initialize Groq model
-            model = initialize_groq_model()
-            
-            # Preprocess documents
-            docs = docs_preprocessing_helper(file_path)
-            db = setup_chroma_db(docs, embedding_function)
-            prompt = create_prompt_template()
+            model              = load_groq_model()
+            embedding_function = load_embedding_function()
+            docs               = docs_preprocessing_helper(data_path("generic.csv"))
+            db                 = setup_chroma_db(docs, embedding_function)
+            prompt             = create_prompt_template()
             st.session_state.chain = create_retrieval_chain(model, db, prompt)
 
-    # Display existing chat messages
+    # Display existing messages
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
             if message["role"] == "assistant":
-                st.markdown(f'<div style="color: white;">{message["content"]}</div>', unsafe_allow_html=True)
+                st.markdown(
+                    f'<div style="color:white;">{message["content"]}</div>',
+                    unsafe_allow_html=True,
+                )
             else:
                 st.markdown(message["content"])
 
-    # Get user input
-    if prompt := st.chat_input("How can I assist you today?"):
-        st.session_state.messages.append({"role": "user", "content": prompt})
+    # Handle new input
+    if user_input := st.chat_input("How can I assist you today?"):
+        st.session_state.messages.append({"role": "user", "content": user_input})
         with st.chat_message("user"):
-            st.markdown(prompt)
+            st.markdown(user_input)
 
-        # Process the query using the LLM
         with st.chat_message("assistant"):
-            message_placeholder = st.empty()
-            
-            # Implement streaming response feel
+            placeholder = st.empty()
             with st.spinner("Thinking..."):
-                response = query_chain(st.session_state.chain, prompt)
-                message_placeholder.markdown(f'<div style="color: white;">{response}</div>', unsafe_allow_html=True)
+                response = query_chain(st.session_state.chain, user_input)
+            placeholder.markdown(
+                f'<div style="color:white;">{response}</div>',
+                unsafe_allow_html=True,
+            )
 
         st.session_state.messages.append({"role": "assistant", "content": response})
