@@ -4,14 +4,8 @@ import mysql.connector as sql
 import pandas as pd
 from langchain_text_splitters import CharacterTextSplitter
 from langchain_community.document_loaders import CSVLoader
-from langchain_community.vectorstores import Chroma
-#from langchain_community.chains import RetrievalQA
-from langchain_core.runnables import RunnablePassthrough
-from langchain_core.output_parsers import StrOutputParser
-
 from langchain_core.prompts import PromptTemplate
 from langchain_groq import ChatGroq
-from langchain_huggingface import HuggingFaceEmbeddings
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -23,10 +17,6 @@ logging.getLogger("transformers").setLevel(logging.ERROR)
 # ============================================================
 
 def get_secret(key, section=None):
-    """
-    Read a secret from st.secrets (Streamlit Cloud) first,
-    then fall back to environment variables for local development.
-    """
     try:
         if section:
             return st.secrets[section][key]
@@ -45,52 +35,33 @@ mysql_config = {
 }
 
 # ============================================================
-# STEP 1: CACHED MODEL + EMBEDDINGS
-# Using @st.cache_resource so these load ONCE and are reused.
-# This is the main fix for the 30-second+ response times.
+# CACHED MODEL
 # ============================================================
 
 @st.cache_resource
 def load_groq_model():
-    """Load the Groq LLM once and cache it for the session lifetime."""
     return ChatGroq(
         temperature=0.1,
         model_name="llama-3.3-70b-versatile",
         groq_api_key=GROQ_API_KEY,
     )
 
-@st.cache_resource
-def load_embedding_function():
-    """
-    Load the HuggingFace embedding model once and cache it.
-    Previously this was re-initialised on every interaction,
-    causing the long delays.
-    """
-    return HuggingFaceEmbeddings(
-        model_name="sentence-transformers/all-mpnet-base-v2"
-    )
-
-model             = load_groq_model()
-embedding_function = load_embedding_function()
+model = load_groq_model()
 
 # ============================================================
-# STEP 2: DATABASE CONFIG & INITIALISATION
+# CROSS-PLATFORM PATH HELPER
 # ============================================================
 
-# Cross-platform path helper (fixes Windows backslash issues on Linux/cloud)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 def data_path(*parts):
-    """Return an absolute path inside the project's data/ folder."""
     return os.path.join(BASE_DIR, "data", *parts)
 
+# ============================================================
+# DATABASE CONFIG & INITIALISATION
+# ============================================================
 
 def initialize_database():
-    """
-    Connect to the cloud MySQL instance, create the database/table if
-    they don't exist, and seed with dummy1.csv if the table is empty.
-    """
-    # Connect without specifying a database first so we can CREATE it
     init_config = {k: v for k, v in mysql_config.items() if k != "database"}
     mycon = sql.connect(**init_config)
     cursor = mycon.cursor()
@@ -119,9 +90,8 @@ def initialize_database():
         records = []
         for _, row in df.iterrows():
             date_parts = str(row["Date"]).split("-")
-            # Handle both DD-MM-YYYY and YYYY-MM-DD in source CSV
             if len(date_parts[0]) == 4:
-                mysql_date = row["Date"]          # already YYYY-MM-DD
+                mysql_date = row["Date"]
             else:
                 mysql_date = f"{date_parts[2]}-{date_parts[1]}-{date_parts[0]}"
             records.append((
@@ -134,12 +104,11 @@ def initialize_database():
                         VALUES (%s, %s, %s, %s, %s, %s, %s)"""
         cursor.executemany(insert_sql, records)
         mycon.commit()
-        print(f"Seeded {len(records)} records from dummy1.csv")
 
     mycon.close()
 
 # ============================================================
-# STEP 3: SQL → ENGLISH (DataDigger)
+# SQL → ENGLISH (DataDigger)
 # ============================================================
 
 sql_to_english_prompt_template = """
@@ -197,7 +166,6 @@ def natural_language_interpretation(original_question, sql_query, columns, resul
                 original_question, sql_query, columns, result
             )
         except Exception as e:
-            print(f"SQL to English conversion error: {e}")
             row = result[0]
             if len(columns) == 1 and len(row) == 1:
                 return f"The result is: {row[0]}"
@@ -212,13 +180,12 @@ def natural_language_interpretation(original_question, sql_query, columns, resul
                 original_question, sql_query, columns, result
             )
         except Exception as e:
-            print(f"SQL to English conversion error: {e}")
             return f"Amount corresponding to the query sums to {result[0][0]}"
 
     return "Found multiple records. Displaying in table format."
 
 # ============================================================
-# STEP 4: SQL QUERY EXECUTION
+# SQL QUERY EXECUTION
 # ============================================================
 
 def read_sql_query(sql_query, db_config):
@@ -335,7 +302,7 @@ def get_mistral_response(question, prompt_template):
     return {"query": response.content, "timing": timing_info}
 
 # ============================================================
-# STEP 5: FINMENTOR — Document QA
+# FINMENTOR — Document QA (pure chromadb, no langchain Chroma wrapper)
 # ============================================================
 
 def docs_preprocessing_helper(file):
@@ -345,60 +312,60 @@ def docs_preprocessing_helper(file):
     return text_splitter.split_documents(docs)
 
 
-def setup_chroma_db(docs, embedding_fn):
-    """In-memory Chroma DB using EphemeralClient (no SQLite file needed)."""
+def setup_chroma_db(docs):
+    """Pure chromadb EphemeralClient — bypasses langchain_community Chroma wrapper entirely."""
     import chromadb
-    client = chromadb.EphemeralClient()
-    return Chroma.from_documents(
-        documents=docs,
-        embedding=embedding_fn,
-        collection_name="fin_mentor",
-        client=client,
-    )
+    from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
 
-@st.cache_resource
-def get_mentor_chain():
-    file_path      = data_path("custom.csv")
-    docs           = docs_preprocessing_helper(file_path)
-    mentor_persist = os.path.join(BASE_DIR, "chroma_fin_mentor")
-    db             = setup_chroma_db(docs, embedding_function, mentor_persist)
-    prompt         = create_prompt_template()
-    return create_retrieval_chain(model, db, prompt)
+    client = chromadb.EphemeralClient()
+    ef = SentenceTransformerEmbeddingFunction(
+        model_name="sentence-transformers/all-mpnet-base-v2"
+    )
+    collection = client.create_collection("fin_mentor", embedding_function=ef)
+    texts = [doc.page_content for doc in docs]
+    ids   = [str(i) for i in range(len(texts))]
+    collection.add(documents=texts, ids=ids)
+    return collection
+
 
 def create_prompt_template():
-    template = """You are a finance consultant chatbot. Answer the customer's questions only using the source data provided.
+    return """You are a finance consultant chatbot. Answer the customer's questions only using the source data provided.
 Please answer to their specific questions. If you are unsure, say "I don't know, please call our customer support". Keep your answers concise.
 
 {context}
 
 Question: {question}
 Answer:"""
-    return PromptTemplate(template=template, input_variables=["context", "question"])
 
 
-def create_retrieval_chain(llm, db, prompt):
-    retriever = db.as_retriever(search_kwargs={"k": 1})
-    chain = (
-        {"context": retriever, "question": RunnablePassthrough()}
-        | prompt
-        | llm
-        | StrOutputParser()
-    )
-    return chain
+def create_retrieval_chain(model, collection, prompt_template):
+    def run(query):
+        results = collection.query(query_texts=[query], n_results=3)
+        context = "\n".join(results["documents"][0])
+        filled  = prompt_template.format(context=context, question=query)
+        return model.invoke(filled).content
+    return run
+
 
 def query_chain(chain, query):
-    return chain.invoke(query)
+    return chain(query)
+
+
+@st.cache_resource
+def get_mentor_chain():
+    docs       = docs_preprocessing_helper(data_path("custom.csv"))
+    collection = setup_chroma_db(docs)
+    prompt     = create_prompt_template()
+    return create_retrieval_chain(model, collection, prompt)
 
 # ============================================================
 # STREAMLIT UI
 # ============================================================
 
 def data_digger():
-    """History-Based Bot that analyzes transaction data using SQL."""
     chat_container  = st.container()
     input_container = st.container()
 
-    # Initialize database (safe to call repeatedly — uses CREATE IF NOT EXISTS)
     try:
         initialize_database()
     except Exception as e:
@@ -423,8 +390,8 @@ def data_digger():
             )
 
             with st.spinner("Generating SQL query..."):
-                result      = get_mistral_response(prompt, data_digger_prompt_template)
-                sql_query   = result["query"]
+                result    = get_mistral_response(prompt, data_digger_prompt_template)
+                sql_query = result["query"]
 
             try:
                 with st.spinner("Executing query..."):
@@ -504,7 +471,6 @@ def fin_mentor():
 
 
 def custom_bot():
-    """Custom Bot page with top navigation for two different bots."""
     st.markdown("""
     <style>
         * { font-family: Verdana, sans-serif !important; }
