@@ -1,0 +1,251 @@
+{
+  "model": "llama-3.3-70b-versatile",
+  "retrieval": "FAISS (IndexFlatIP + cosine similarity)",
+  "average_scores": {
+    "response_relevancy": 0.6871214106678962,
+    "faithfulness": 1.0,
+    "semantic_similarity": 0.747770580649376,
+    "bleu_score": 0.07230930554962782,
+    "rouge_1": 0.30451105069662604,
+    "rouge_2": 0.08867598765120263,
+    "rouge_l": 0.2632540020587932
+  },
+  "system_performance": {
+    "average_response_time": 0.5719964027404785,
+    "average_cpu_usage": 622.0550000000001,
+    "average_memory_usage": 1548.6099609375,
+    "average_gpu_memory_usage": null
+  },
+  "individual_results": [
+    {
+      "question": "PaisaVault emphasizes the 'butterfly effect' in finance. Could you elaborate on what this means in the context of the app?",
+      "reference": "The butterfly effect refers to the idea that small financial choices today, like skipping a daily latte, can have a significant impact on your long-term financial well-being, similar to how a butterfly flapping its wings can supposedly cause a hurricane. PaisaVault uses this concept to show how small daily decisions compound over time.",
+      "response": "The Butterfly Effect Simulator in PaisaVault shows how small financial decisions today can lead to significant changes in your future, analyzing patterns in your financial data to predict potential outcomes based on different choices.",
+      "context": "Tell me about this app.: How do I use the Butterfly Effect Simulator?\n\"PaisaVault is a personal finance management application designed to help you understand how small financial decisions today can lead to significant changes in your future. We offer powerful tools like the Butterfly Effect Simulator and Financial Scenario Tester to visualize your financial journey and make informed decisions.\": \"To use the Butterfly Effect Simulator in PaisaVault\nNone: you simply enter your financial details including income,expenses,and savings. Then you can adjust different parameters to see how small financial changes might impact your future. The simulator will provide insights on whether your financial habits are leading towards stability,growth,or risk.\"\nTell me about this app.: How can I get the most out of the Butterfly Effect Simulator.\n\"PaisaVault is a personal finance management application designed to help you understand how small financial decisions today can lead to significant changes in your future. We offer powerful tools like the Butterfly Effect Simulator and Financial Scenario Tester to visualize your financial journey and make informed decisions.\": \"To get the most out of the Butterfly Effect Simulator\nNone: start by entering accurate financial details including your income,expenses,and savings. Then,experiment with small adjustments to different parameters\u00e2\u20ac\u201dlike reducing a specific expense category by 5% or increasing your monthly savings by a small amount\u00e2\u20ac\u201dand observe the projected long-term impact. Try multiple scenarios and compare results to identify which small changes could have the biggest positive effect on your financial future.\"\nTell me about this app.: What is the Butterfly Effect Simulator in this app.\n\"PaisaVault is a personal finance management application designed to help you understand how small financial decisions today can lead to significant changes in your future. We offer powerful tools like the Butterfly Effect Simulator and Financial Scenario Tester to visualize your financial journey and make informed decisions.\": \"The Butterfly Effect Simulator in PaisaVault is an LSTM-based tool that shows how small financial decisions today can lead to significant changes in your future. It analyzes patterns in your financial data to predict potential outcomes based on different choices\nNone: helping you understand the long-term impact of daily spending habits,savings,and investments.\"",
+      "metrics": {
+        "response_relevancy": 0.6886186003684998,
+        "faithfulness": 1.0,
+        "semantic_similarity": 0.7499477863311768,
+        "bleu_score": 0.026134269433000606,
+        "rouge_scores": {
+          "rouge_1": 0.33802816418171,
+          "rouge_2": 0.0476190429024948,
+          "rouge_l": 0.28169013601269594
+        }
+      },
+      "performance": {
+        "response_time_seconds": 0.5997579097747803,
+        "cpu_percent": 607.1,
+        "memory_usage_mb": 1567.77734375,
+        "gpu_memory_usage_mb": null
+      }
+    },
+    {
+      "question": "How does PaisaVault utilize AI to help users make better financial decisions?",
+      "reference": "PaisaVault incorporates LSTM, a type of artificial intelligence, to analyze past financial data, predict future outcomes, and provide personalized recommendations for improvement. This technology powers features like the Butterfly Effect Simulator and the personalized AI assistant.",
+      "response": "PaisaVault uses advanced LSTM artificial intelligence to simulate future financial scenarios based on the user's unique data, and its AI chatbot provides personalized advice and insights to help users make informed decisions.",
+      "context": "Tell me about this app.: Tell me about this application.\n\"PaisaVault is a personal finance management application designed to help you understand how small financial decisions today can lead to significant changes in your future. We offer powerful tools like the Butterfly Effect Simulator and Financial Scenario Tester to visualize your financial journey and make informed decisions.\": \"PaisaVault is a comprehensive AI-assisted personal finance management system designed to help users manage their finances efficiently. It serves as a central hub where you can view summaries of your financial status\nNone: including balances,recent transactions,daily expenditures,and spending analysis with personalized financial suggestions for saving money and achieving long-term financial goals.\"\nTell me about this app.: How does the personalized assistant work?\n\"PaisaVault is a personal finance management application designed to help you understand how small financial decisions today can lead to significant changes in your future. We offer powerful tools like the Butterfly Effect Simulator and Financial Scenario Tester to visualize your financial journey and make informed decisions.\": \"The personalized assistant in PaisaVault is an AI chatbot trained specifically on your financial data. It can answer transactional queries like 'What did I spend most on last month?' as well as provide insightful advice such as 'How can I improve my savings to buy a car in 3 years?' The more financial data you provide\nNone: the more personalized and accurate the assistant's responses become.\"\nTell me about this app.: What makes PaisaVault different from other financial apps?\n\"PaisaVault is a personal finance management application designed to help you understand how small financial decisions today can lead to significant changes in your future. We offer powerful tools like the Butterfly Effect Simulator and Financial Scenario Tester to visualize your financial journey and make informed decisions.\": \"Unlike many financial apps that simply track expenses\nNone: PaisaVault uses advanced LSTM artificial intelligence to simulate future financial scenarios based on your unique data. Our application specifically focuses on the 'Butterfly Effect' of small financial decisions and provides comprehensive financial resilience testing. We offer not just tracking,but predictive insights and personalized recommendations for long-term financial success.\"",
+      "metrics": {
+        "response_relevancy": 0.682373046875,
+        "faithfulness": 1.0,
+        "semantic_similarity": 0.8620117902755737,
+        "bleu_score": 0.020028181211501076,
+        "rouge_scores": {
+          "rouge_1": 0.3174603124716554,
+          "rouge_2": 0.0,
+          "rouge_l": 0.2857142807256236
+        }
+      },
+      "performance": {
+        "response_time_seconds": 0.34271717071533203,
+        "cpu_percent": 685.7,
+        "memory_usage_mb": 1558.103515625,
+        "gpu_memory_usage_mb": null
+      }
+    },
+    {
+      "question": "What's the primary difference between PaisaVault and other financial apps in terms of data privacy?",
+      "reference": "Unlike many finance apps that require linking bank accounts or sharing personal information, PaisaVault prioritizes user privacy. It doesn't collect personally identifiable information (PII) and allows users to manually upload their data, giving them full control.",
+      "response": "PaisaVault does not connect directly to your bank account and does not store your banking credentials, giving you complete control over what information you share with the application.",
+      "context": "Tell me about this app.: How does PaisaVault protect my privacy?\n\"PaisaVault is a personal finance management application designed to help you understand how small financial decisions today can lead to significant changes in your future. We offer powerful tools like the Butterfly Effect Simulator and Financial Scenario Tester to visualize your financial journey and make informed decisions.\": \"PaisaVault does not connect directly to your bank account and does not store your banking credentials. All financial data is provided by you through manual entry or CSV upload. User authentication uses a secure local system with hashed passwords. The application does not share your financial data with third parties. For maximum privacy\nNone: you can always download and delete your data at the end of each session.\"\nTell me about this app.: Do I need to share my bank account details or link my accounts?\n\"PaisaVault is a personal finance management application designed to help you understand how small financial decisions today can lead to significant changes in your future. We offer powerful tools like the Butterfly Effect Simulator and Financial Scenario Tester to visualize your financial journey and make informed decisions.\": \"No\nNone: PaisaVault operates with a privacy-centered approach. You don't need to share any banking details or link accounts. You only upload the financial data you're comfortable sharing,and we don't collect personally identifiable information (PII). This gives you complete control over what information you share with the application.\"\nTell me about this app.: Can I connect this app to my bank account?\n\"PaisaVault is a personal finance management application designed to help you understand how small financial decisions today can lead to significant changes in your future. We offer powerful tools like the Butterfly Effect Simulator and Financial Scenario Tester to visualize your financial journey and make informed decisions.\": \"No\nNone: PaisaVault doesn't connect directly to bank accounts. This is part of our privacy-centered approach,where we don't ask for or store sensitive banking information. Instead,you manually upload or enter your financial transactions. While this requires more effort than automatic bank synchronization,it provides greater privacy and control over what financial information you share with the application.\"",
+      "metrics": {
+        "response_relevancy": 0.6544005870819092,
+        "faithfulness": 1.0,
+        "semantic_similarity": 0.8491833209991455,
+        "bleu_score": 0.012802519985853467,
+        "rouge_scores": {
+          "rouge_1": 0.2333333285333334,
+          "rouge_2": 0.0,
+          "rouge_l": 0.1333333285333335
+        }
+      },
+      "performance": {
+        "response_time_seconds": 0.4861466884613037,
+        "cpu_percent": 608.6,
+        "memory_usage_mb": 1558.384765625,
+        "gpu_memory_usage_mb": null
+      }
+    },
+    {
+      "question": "If I'm a complete beginner with investing, how can PaisaVault assist me?",
+      "reference": "PaisaVault offers educational resources and goal-setting tools to help beginners understand basic investment principles. It also simulates how different saving and investment scenarios could affect their long-term financial health. However, it doesn't give specific investment advice.",
+      "response": "PaisaVault can assist you by offering investment options such as mutual funds, fixed deposits, and index funds, which are suitable for beginners. Additionally, it provides educational resources and tools to help you make informed decisions.",
+      "context": "Tell me about this app.: What are the best investment options for beginners?\n\"PaisaVault is a personal finance management application designed to help you understand how small financial decisions today can lead to significant changes in your future. We offer powerful tools like the Butterfly Effect Simulator and Financial Scenario Tester to visualize your financial journey and make informed decisions.\": \"Beginners can start with mutual funds\nNone: fixed deposits,and index funds before exploring stocks and real estate.\"\nTell me about this app.: Tell me about the educational resources available.\n\"PaisaVault is a personal finance management application designed to help you understand how small financial decisions today can lead to significant changes in your future. We offer powerful tools like the Butterfly Effect Simulator and Financial Scenario Tester to visualize your financial journey and make informed decisions.\": \"PaisaVault offers a curated collection of educational resources in the 'Education' section. These include handpicked articles and videos covering important financial topics like savings strategies\nNone: investment basics,real estate,mutual funds,stock trading,tax planning,budgeting,long-term financial planning,and portfolio diversification. These resources are designed to enhance your financial literacy and empower better decision-making.\"\nTell me about this app.: What tools are available without creating an account?\n\"PaisaVault is a personal finance management application designed to help you understand how small financial decisions today can lead to significant changes in your future. We offer powerful tools like the Butterfly Effect Simulator and Financial Scenario Tester to visualize your financial journey and make informed decisions.\": \"Without creating an account\nNone: you can access several useful tools on PaisaVault's landing page. These include handy financial calculators for simple interest,compound interest,EMI,home loans,and mortgages. You can also browse our hand-picked financial articles,view static demonstrations of features available to account holders,and interact with a generic financial bot that answers basic questions about personal finance and the application.\"",
+      "metrics": {
+        "response_relevancy": 0.8015123009681702,
+        "faithfulness": 1.0,
+        "semantic_similarity": 0.9186186790466309,
+        "bleu_score": 0.04899017558375205,
+        "rouge_scores": {
+          "rouge_1": 0.3076923026934912,
+          "rouge_2": 0.11594202398655765,
+          "rouge_l": 0.3076923026934912
+        }
+      },
+      "performance": {
+        "response_time_seconds": 0.5000522136688232,
+        "cpu_percent": 598.95,
+        "memory_usage_mb": 1558.5078125,
+        "gpu_memory_usage_mb": null
+      }
+    },
+    {
+      "question": "Explain how the Financial Scenario Tester in PaisaVault can help someone prepare for unforeseen circumstances.",
+      "reference": "The Financial Scenario Tester allows users to simulate different financial situations, like a job loss or medical emergency, to assess their financial resilience. This helps them identify potential weaknesses in their financial plan and take proactive steps to strengthen their safety net.",
+      "response": "The Financial Scenario Tester helps you prepare for financial uncertainties by simulating how well your finances would withstand different situations like job loss, medical emergencies, or economic downturns, allowing you to identify vulnerabilities and take proactive steps.",
+      "context": "Tell me about this app.: What's the benefit of the scenario testing feature?\n\"PaisaVault is a personal finance management application designed to help you understand how small financial decisions today can lead to significant changes in your future. We offer powerful tools like the Butterfly Effect Simulator and Financial Scenario Tester to visualize your financial journey and make informed decisions.\": \"The benefit of the scenario testing feature is that it helps you prepare for financial uncertainties by simulating how well your finances would withstand different situations like job loss\nNone: medical emergencies,or economic downturns. By identifying potential vulnerabilities in advance,you can take proactive steps to strengthen your financial position,such as building an emergency fund or adjusting your insurance coverage,before facing actual challenges.\"\nTell me about this app.: What information do I need to provide for the Financial Scenario Tester?\n\"PaisaVault is a personal finance management application designed to help you understand how small financial decisions today can lead to significant changes in your future. We offer powerful tools like the Butterfly Effect Simulator and Financial Scenario Tester to visualize your financial journey and make informed decisions.\": \"For the Financial Scenario Tester in PaisaVault\nNone: you'll need to provide key personal and financial details including your age,number of dependents,monthly income (including any additional income),and monthly expenses (such as rent,utilities,groceries,transportation,and discretionary spending). The more accurate this information is,the more precise your financial assessment will be.\"\nTell me about this app.: What is the Financial Scenario Tester?\n\"PaisaVault is a personal finance management application designed to help you understand how small financial decisions today can lead to significant changes in your future. We offer powerful tools like the Butterfly Effect Simulator and Financial Scenario Tester to visualize your financial journey and make informed decisions.\": \"The Financial Scenario Tester in PaisaVault is a smart\nNone: data-driven tool that helps you gain a deeper understanding of your financial stability. It analyzes your personal and financial details to calculate savings projections,survival duration without income,and spending patterns. It also provides an interactive dashboard with scores for your economic habits and financial resilience.\"",
+      "metrics": {
+        "response_relevancy": 0.6515306830406189,
+        "faithfulness": 1.0,
+        "semantic_similarity": 0.961632490158081,
+        "bleu_score": 0.13282105402547278,
+        "rouge_scores": {
+          "rouge_1": 0.47222221722222224,
+          "rouge_2": 0.15789473185595584,
+          "rouge_l": 0.3888888838888889
+        }
+      },
+      "performance": {
+        "response_time_seconds": 0.3587930202484131,
+        "cpu_percent": 607.0,
+        "memory_usage_mb": 1558.640625,
+        "gpu_memory_usage_mb": null
+      }
+    },
+    {
+      "question": "How can PaisaVault help someone create and stick to a budget?",
+      "reference": "It's recommended to have 3-6 months of essential expenses saved in an easily accessible emergency fund.",
+      "response": "PaisaVault can help by providing tools to track income, list essential expenses, set saving goals, and allocate money accordingly. Additionally, it can help identify common budgeting mistakes such as underestimating expenses and not tracking spending, and offer strategies to avoid impulse spending like waiting before making purchases and tracking spending habits.",
+      "context": "Tell me about this app.: How to create a budget?\n\"PaisaVault is a personal finance management application designed to help you understand how small financial decisions today can lead to significant changes in your future. We offer powerful tools like the Butterfly Effect Simulator and Financial Scenario Tester to visualize your financial journey and make informed decisions.\": \"To create a budget\nNone: track your income,list essential expenses,set saving goals,and allocate money accordingly.\"\nTell me about this app.: What are common budgeting mistakes?\n\"PaisaVault is a personal finance management application designed to help you understand how small financial decisions today can lead to significant changes in your future. We offer powerful tools like the Butterfly Effect Simulator and Financial Scenario Tester to visualize your financial journey and make informed decisions.\": \"Common mistakes include underestimating expenses\nNone: not tracking spending,and failing to adjust budgets as needed.\"\nTell me about this app.: How can I avoid impulse spending?\n\"PaisaVault is a personal finance management application designed to help you understand how small financial decisions today can lead to significant changes in your future. We offer powerful tools like the Butterfly Effect Simulator and Financial Scenario Tester to visualize your financial journey and make informed decisions.\": \"Set a budget\nNone: wait before making purchases,and track spending habits.\"",
+      "metrics": {
+        "response_relevancy": 0.8455645442008972,
+        "faithfulness": 1.0,
+        "semantic_similarity": 0.3503987193107605,
+        "bleu_score": 0.008371034072789827,
+        "rouge_scores": {
+          "rouge_1": 0.10169491130135033,
+          "rouge_2": 0.0,
+          "rouge_l": 0.10169491130135033
+        }
+      },
+      "performance": {
+        "response_time_seconds": 1.601100206375122,
+        "cpu_percent": 607.9,
+        "memory_usage_mb": 1545.1171875,
+        "gpu_memory_usage_mb": null
+      }
+    },
+    {
+      "question": "What are the key metrics displayed on PaisaVault's dashboard?",
+      "reference": "The dashboard visualizes key information like income, expenses, net savings, saving rate, progress towards goals, and financial health scores. It provides a comprehensive overview of your financial situation.",
+      "response": "The key metrics displayed on PaisaVault's dashboard include: \n1. Savings projection\n2. Spending patterns\n3. Economic Habit Score\n4. Asset allocation overview\n5. Resilience Score.",
+      "context": "Tell me about this app.: What financial metrics does this app track?\n\"PaisaVault is a personal finance management application designed to help you understand how small financial decisions today can lead to significant changes in your future. We offer powerful tools like the Butterfly Effect Simulator and Financial Scenario Tester to visualize your financial journey and make informed decisions.\": \"PaisaVault tracks numerous financial metrics including total income\nNone: expenses by category,net savings,saving rate (savings as percentage of income),spending trends over time,progress toward financial goals,cash flow patterns,discretionary vs. essential spending ratios,and comparative performance against benchmarks. These metrics are visualized through charts and graphs in the Overview and Performance Analysis sections.\"\nTell me about this app.: What insights can I get from the Performance Analysis section?\n\"PaisaVault is a personal finance management application designed to help you understand how small financial decisions today can lead to significant changes in your future. We offer powerful tools like the Butterfly Effect Simulator and Financial Scenario Tester to visualize your financial journey and make informed decisions.\": \"The Performance Analysis section offers advanced analytics and visualizations that compare your financial habits to the average consumer. It shows trends in your spending and saving patterns\nNone: identifies areas of improvement,and demonstrates how your financial management has evolved since you started using PaisaVault. These insights provide a different perspective on your financial behavior and help you make more informed decisions.\"\nTell me about this app.: Tell me about the dashboard in your app.\n\"PaisaVault is a personal finance management application designed to help you understand how small financial decisions today can lead to significant changes in your future. We offer powerful tools like the Butterfly Effect Simulator and Financial Scenario Tester to visualize your financial journey and make informed decisions.\": \"PaisaVault features an interactive\nNone: easy-to-understand dashboard that displays key financial metrics including your savings projection,spending patterns,Economic Habit Score,asset allocation overview,and Resilience Score. The dashboard visualizes your financial health at a glance and tracks changes over time,allowing you to monitor progress toward your goals and adjust strategies accordingly.\"",
+      "metrics": {
+        "response_relevancy": 0.8625140190124512,
+        "faithfulness": 1.0,
+        "semantic_similarity": 0.6224428415298462,
+        "bleu_score": 0.00818663455179106,
+        "rouge_scores": {
+          "rouge_1": 0.15686274011534043,
+          "rouge_2": 0.0,
+          "rouge_l": 0.11764705384083066
+        }
+      },
+      "performance": {
+        "response_time_seconds": 0.6418440341949463,
+        "cpu_percent": 605.95,
+        "memory_usage_mb": 1535.1796875,
+        "gpu_memory_usage_mb": null
+      }
+    },
+    {
+      "question": "Besides tracking expenses, what other ways does PaisaVault help users improve their financial health?",
+      "reference": "Beyond expense tracking, PaisaVault provides personalized advice, simulates the long-term effects of financial decisions, compares spending habits to benchmarks, offers educational resources, and tests financial resilience, all contributing to improved financial habits.",
+      "response": "Besides tracking expenses, PaisaVault helps users improve their financial health by enabling them to save consistently, invest wisely, and build multiple income streams.",
+      "context": "Tell me about this app.: How can I improve my financial health?\n\"PaisaVault is a personal finance management application designed to help you understand how small financial decisions today can lead to significant changes in your future. We offer powerful tools like the Butterfly Effect Simulator and Financial Scenario Tester to visualize your financial journey and make informed decisions.\": \"Track expenses\nNone: save consistently,invest wisely,and build multiple income streams.\"\nTell me about this app.: Why is health insurance important?\n\"PaisaVault is a personal finance management application designed to help you understand how small financial decisions today can lead to significant changes in your future. We offer powerful tools like the Butterfly Effect Simulator and Financial Scenario Tester to visualize your financial journey and make informed decisions.\": \"Health insurance covers medical expenses and protects your savings from unexpected hospital bills.\"\nTell me about this app.: What expense categories are available?\n\"PaisaVault is a personal finance management application designed to help you understand how small financial decisions today can lead to significant changes in your future. We offer powerful tools like the Butterfly Effect Simulator and Financial Scenario Tester to visualize your financial journey and make informed decisions.\": \"PaisaVault offers comprehensive expense categories including rent/mortgage\nNone: groceries (both edible and household items),education expenses,healthcare costs,transportation,utilities,communication services,financial obligations (like loans and insurance),discretionary spending (shopping,entertainment,dining),and miscellaneous expenses like travel and gifts. This detailed categorization helps provide more accurate insights into your spending patterns.\"",
+      "metrics": {
+        "response_relevancy": 0.830925464630127,
+        "faithfulness": 1.0,
+        "semantic_similarity": 0.8893287181854248,
+        "bleu_score": 0.01639367291793554,
+        "rouge_scores": {
+          "rouge_1": 0.1568627401460978,
+          "rouge_2": 0.0,
+          "rouge_l": 0.1568627401460978
+        }
+      },
+      "performance": {
+        "response_time_seconds": 0.436007022857666,
+        "cpu_percent": 607.35,
+        "memory_usage_mb": 1535.396484375,
+        "gpu_memory_usage_mb": null
+      }
+    },
+    {
+      "question": "I'm interested in using PaisaVault but not ready to create an account. What resources are available to me?",
+      "reference": "Even without an account, you can access financial calculators, read educational articles, see demos of the app's features, and interact with a generic financial chatbot on PaisaVault's landing page.",
+      "response": "You can access financial calculators for simple interest, compound interest, EMI, home loans, and mortgages, as well as browse financial articles and interact with a generic financial bot on the landing page.",
+      "context": "Tell me about this app.: What tools are available without creating an account?\n\"PaisaVault is a personal finance management application designed to help you understand how small financial decisions today can lead to significant changes in your future. We offer powerful tools like the Butterfly Effect Simulator and Financial Scenario Tester to visualize your financial journey and make informed decisions.\": \"Without creating an account\nNone: you can access several useful tools on PaisaVault's landing page. These include handy financial calculators for simple interest,compound interest,EMI,home loans,and mortgages. You can also browse our hand-picked financial articles,view static demonstrations of features available to account holders,and interact with a generic financial bot that answers basic questions about personal finance and the application.\"\nTell me about this app.: How do I get started with this app.\n\"PaisaVault is a personal finance management application designed to help you understand how small financial decisions today can lead to significant changes in your future. We offer powerful tools like the Butterfly Effect Simulator and Financial Scenario Tester to visualize your financial journey and make informed decisions.\": \"To get started with PaisaVault\nNone: you can first explore our landing page which offers limited access to tools like financial calculators and articles. When you're ready,create a personal account with just a username and password - no email or banking details required. After logging in,visit the 'Getting Started' section which explains the application flow and how to upload your financial data or start recording transactions from scratch.\"\nTell me about this app.: Do I need to share my bank account details or link my accounts?\n\"PaisaVault is a personal finance management application designed to help you understand how small financial decisions today can lead to significant changes in your future. We offer powerful tools like the Butterfly Effect Simulator and Financial Scenario Tester to visualize your financial journey and make informed decisions.\": \"No\nNone: PaisaVault operates with a privacy-centered approach. You don't need to share any banking details or link accounts. You only upload the financial data you're comfortable sharing,and we don't collect personally identifiable information (PII). This gives you complete control over what information you share with the application.\"",
+      "metrics": {
+        "response_relevancy": 0.21584583818912506,
+        "faithfulness": 1.0,
+        "semantic_similarity": 0.49034664034843445,
+        "bleu_score": 0.2746478265715413,
+        "rouge_scores": {
+          "rouge_1": 0.4363636313652893,
+          "rouge_2": 0.2711864356908935,
+          "rouge_l": 0.3999999950016529
+        }
+      },
+      "performance": {
+        "response_time_seconds": 0.3807687759399414,
+        "cpu_percent": 701.25,
+        "memory_usage_mb": 1535.455078125,
+        "gpu_memory_usage_mb": null
+      }
+    },
+    {
+      "question": "What is the difference between the generic financial bot and the personalized AI assistant within PaisaVault?",
+      "reference": "The generic bot available on the landing page answers general financial questions. The personalized assistant, accessible after creating an account, is trained on your individual financial data to provide tailored insights and recommendations.",
+      "response": "The generic bot answers general financial questions, while the custom bot (personalized AI assistant) is trained on your personal financial data and provides highly personalized insights and recommendations based on your spending patterns, saving habits, and financial goals.",
+      "context": "Tell me about this app.: What is the difference between the generic bot and the custom bot?\n\"PaisaVault is a personal finance management application designed to help you understand how small financial decisions today can lead to significant changes in your future. We offer powerful tools like the Butterfly Effect Simulator and Financial Scenario Tester to visualize your financial journey and make informed decisions.\": \"The generic bot available on the landing page can answer general financial questions about topics like savings\nNone: investments,and budgeting,as well as basic information about how PaisaVault works. The custom bot,available after logging in,is trained specifically on your personal financial data and can provide highly personalized insights and recommendations based on your actual spending patterns,saving habits,and financial goals.\"\nTell me about this app.: How does the personalized assistant work?\n\"PaisaVault is a personal finance management application designed to help you understand how small financial decisions today can lead to significant changes in your future. We offer powerful tools like the Butterfly Effect Simulator and Financial Scenario Tester to visualize your financial journey and make informed decisions.\": \"The personalized assistant in PaisaVault is an AI chatbot trained specifically on your financial data. It can answer transactional queries like 'What did I spend most on last month?' as well as provide insightful advice such as 'How can I improve my savings to buy a car in 3 years?' The more financial data you provide\nNone: the more personalized and accurate the assistant's responses become.\"\nTell me about this app.: What does the FinMentor bot do in PaisaVault?\n\"PaisaVault is a personal finance management application designed to help you understand how small financial decisions today can lead to significant changes in your future. We offer powerful tools like the Butterfly Effect Simulator and Financial Scenario Tester to visualize your financial journey and make informed decisions.\": \"FinMentor is an AI-powered financial advice bot in the Custom Bot section. Unlike DataDigger which queries your personal transaction data\nNone: FinMentor answers general financial questions using a curated knowledge base. Ask it about budgeting strategies,how to use the Butterfly Effect Simulator,how to improve savings,what the 50/30/20 rule means,or how PaisaVault features can help your specific financial situation.\"",
+      "metrics": {
+        "response_relevancy": 0.6379290223121643,
+        "faithfulness": 1.0,
+        "semantic_similarity": 0.7837948203086853,
+        "bleu_score": 0.17471768714264044,
+        "rouge_scores": {
+          "rouge_1": 0.5245901589357701,
+          "rouge_2": 0.2941176420761246,
+          "rouge_l": 0.45901638844396675
+        }
+      },
+      "performance": {
+        "response_time_seconds": 0.37277698516845703,
+        "cpu_percent": 590.75,
+        "memory_usage_mb": 1533.537109375,
+        "gpu_memory_usage_mb": null
+      }
+    }
+  ]
+}
