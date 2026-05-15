@@ -83,4 +83,4 @@ def features_page():
     </div>
     """, unsafe_allow_html=True)
     
-    st.image("static/car.JPG", caption="Scenario Testing Dashboard", use_container_width=True)
+    st.image("static/car.jpg", caption="Scenario Testing Dashboard", use_container_width=True)
