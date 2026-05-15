@@ -1,9 +1,13 @@
 import streamlit as st
 import pandas as pd
 import base64
+import os
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 def get_base64_image(image_path):
-    with open(image_path, "rb") as img_file:
+    full_path = os.path.join(BASE_DIR, image_path)
+    with open(full_path, "rb") as img_file:
         return base64.b64encode(img_file.read()).decode()
 
 def getting_started():
