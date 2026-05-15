@@ -103,3 +103,4 @@ def education():
       with col:
          for i, (label, image_path, link, key) in enumerate(data):
                centered_link_button(col, label, image_path, link, key)
+         st.markdown("<h3 style='margin-bottom: -45px'><br></h3>", unsafe_allow_html=True)

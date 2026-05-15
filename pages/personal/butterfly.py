@@ -317,7 +317,7 @@ def display_recommendations(df, category_adjustments):
             """, unsafe_allow_html=True)
     
     # Generic advice
-    st.markdown("<h3 style='margin-top: 20px; margin-bottom: -25px'>General Financial Advice</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='margin-top: 20px; margin-bottom: -25px'>General Financial Advice<br></h3>", unsafe_allow_html=True)
 
     st.markdown(
         """
@@ -535,7 +535,7 @@ def butterfly():
         display_sankey_chart(df, category_adjustments, monthly_expenses)
         
         # Recommendations
-        st.markdown("<h3 style='margin-bottom: -25px'>Personalized Recommendations</h3>", unsafe_allow_html=True)
+        st.markdown("<h3 style='margin-bottom: -25px'>Personalized Recommendations<br></h3>", unsafe_allow_html=True)
 
         display_recommendations(df, category_adjustments)
 
