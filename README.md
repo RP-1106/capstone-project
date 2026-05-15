@@ -1,4 +1,4 @@
-# AI Assisted Personal Finance Management System — PaisaVault
+# PaisaVault: AI-Assisted Personal Finance Management System
 
 <p align="justify">
 A lightweight, privacy-focused financial management tool with intelligent features to help users make better financial decisions without requiring external account integration.
