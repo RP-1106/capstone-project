@@ -483,7 +483,7 @@ def butterfly():
         with col2:
             display_savings_graph(current_monthly_savings, projected_monthly_savings, months_to_predict)
 
-        st.markdown("<h3 style='margin-bottom: -45px'>So, what did we find?</h3>", unsafe_allow_html=True)
+        st.markdown("<h3 style='margin-bottom: -45px'>So, what did we find?<br></h3>", unsafe_allow_html=True)
 
         h1, h2 = st.columns([1,1])
         with h1:
