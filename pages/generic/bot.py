@@ -126,8 +126,9 @@ def bot_page():
     if "messages" not in st.session_state:
         st.session_state.messages = []
 
-    # Load model + chain once per session
-    st.session_state.chain = get_bot_chain()
+    # Only build the chain once — reuse it across tab switches
+    if "chain" not in st.session_state:
+        st.session_state.chain = get_bot_chain()
 
     # Display existing messages
     for message in st.session_state.messages:

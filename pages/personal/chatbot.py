@@ -454,7 +454,8 @@ def fin_mentor():
     if "mentor_messages" not in st.session_state:
         st.session_state.mentor_messages = []
 
-    st.session_state.mentor_chain = get_mentor_chain()
+    if "mentor_chain" not in st.session_state:
+        st.session_state.mentor_chain = get_mentor_chain()
 
     with input_container:
         prompt = st.chat_input("What is your finance question?")
