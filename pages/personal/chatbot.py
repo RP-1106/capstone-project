@@ -345,10 +345,22 @@ def docs_preprocessing_helper(file):
     return text_splitter.split_documents(docs)
 
 
-def setup_chroma_db(docs, embedding_fn, persist_directory):
-    if not os.path.exists(persist_directory):
-        os.makedirs(persist_directory)
-    return Chroma.from_documents(docs, embedding_fn, persist_directory=persist_directory)
+def setup_chroma_db(docs, embedding_fn):
+    """In-memory Chroma DB using EphemeralClient (no SQLite file needed)."""
+    import chromadb
+    from langchain_community.vectorstores import Chroma
+
+    client = chromadb.EphemeralClient()
+    texts     = [doc.page_content for doc in docs]
+    metadatas = [doc.metadata for doc in docs]
+
+    return Chroma.from_texts(
+        texts=texts,
+        embedding=embedding_fn,
+        metadatas=metadatas,
+        collection_name="fin_mentor",
+        client=client,
+    )
 
 @st.cache_resource
 def get_mentor_chain():
