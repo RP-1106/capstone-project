@@ -413,7 +413,8 @@ def data_digger():
     with chat_container:
         for message in st.session_state.digger_messages:
             qid = message["query_id"]
-            with st.chat_message(message["role"]):
+            avatar = "🧑" if message["role"] == "user" else "🤖"
+            with st.chat_message(message["role"], avatar=avatar):
                 st.markdown(message["content"])
                 if (
                     message["role"] == "assistant"
@@ -441,7 +442,8 @@ def fin_mentor():
 
     with chat_container:
         for message in st.session_state.mentor_messages:
-            with st.chat_message(message["role"]):
+            avatar = "🧑" if message["role"] == "user" else "🤖"
+            with st.chat_message(message["role"], avatar=avatar):
                 st.markdown(message["content"])
 
 

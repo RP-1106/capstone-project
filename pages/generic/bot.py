@@ -125,7 +125,8 @@ def bot_page():
     chain = get_bot_chain()
 
     for message in st.session_state.messages:
-        with st.chat_message(message["role"]):
+        avatar = "🧑" if message["role"] == "user" else "🤖"
+        with st.chat_message(message["role"], avatar=avatar):
             if message["role"] == "assistant":
                 st.markdown(
                     f'<div style="color:white;">{message["content"]}</div>',
@@ -136,10 +137,10 @@ def bot_page():
 
     if user_input := st.chat_input("How can I assist you today?"):
         st.session_state.messages.append({"role": "user", "content": user_input})
-        with st.chat_message("user"):
+        with st.chat_message("user", avatar="🧑"):
             st.markdown(user_input)
 
-        with st.chat_message("assistant"):
+        with st.chat_message("assistant", avatar="🤖"):
             placeholder = st.empty()
             with st.spinner("Thinking..."):
                 response = chain(user_input)
