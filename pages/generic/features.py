@@ -63,7 +63,7 @@ def features_page():
     </div>
     """, unsafe_allow_html=True)
     
-    st.image("static/butterfly.JPG", caption="Butterfly Effect Dashboard", use_container_width=True)
+    st.image("static/butterfly.jpg", caption="Butterfly Effect Dashboard", use_container_width=True)
     
     # Feature 3: Scenario Testing Model
     st.markdown("""
