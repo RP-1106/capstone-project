@@ -1,10 +1,11 @@
 import streamlit as st
 import os
+import numpy as np
 from langchain_text_splitters import CharacterTextSplitter
 from langchain_community.document_loaders import CSVLoader
-from langchain_core.prompts import PromptTemplate
 from langchain_groq import ChatGroq
-from langchain_huggingface import HuggingFaceEmbeddings
+from sentence_transformers import SentenceTransformer
+import faiss
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -12,7 +13,7 @@ import logging
 logging.getLogger("transformers").setLevel(logging.ERROR)
 
 # ============================================================
-# SECRETS: Read from st.secrets (cloud) or env vars (local)
+# SECRETS
 # ============================================================
 
 def get_secret(key, section=None):
@@ -22,15 +23,14 @@ def get_secret(key, section=None):
         return os.getenv(key)
 
 # ============================================================
-# CACHED RESOURCES — load once, reuse across all interactions
+# CACHED RESOURCES
 # ============================================================
 
 @st.cache_resource
 def load_groq_model():
-    """Load the Groq LLM once and cache it."""
     groq_api_key = get_secret("GROQ_API_KEY")
     if not groq_api_key:
-        st.error("Groq API key not found. Please set GROQ_API_KEY in your secrets.")
+        st.error("Groq API key not found.")
         st.stop()
     return ChatGroq(
         groq_api_key=groq_api_key,
@@ -38,78 +38,74 @@ def load_groq_model():
         temperature=0.1,
     )
 
-# Cross-platform data path
+@st.cache_resource
+def load_embedding_model():
+    return SentenceTransformer("sentence-transformers/all-mpnet-base-v2")
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 def data_path(*parts):
     return os.path.join(BASE_DIR, "data", *parts)
 
 # ============================================================
-# DOCUMENT HELPERS
+# FAISS INDEX
 # ============================================================
 
 def docs_preprocessing_helper(file):
+    from langchain_community.document_loaders import CSVLoader
+    from langchain_text_splitters import CharacterTextSplitter
     loader = CSVLoader(file)
     docs = loader.load()
     text_splitter = CharacterTextSplitter(chunk_size=800, chunk_overlap=0)
     return text_splitter.split_documents(docs)
 
 
-def setup_chroma_db(docs):
-    """Pure chromadb EphemeralClient — bypasses langchain_community Chroma wrapper entirely."""
-    import chromadb
-    from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
-
-    client = chromadb.EphemeralClient()
-    ef = SentenceTransformerEmbeddingFunction(
-        model_name="sentence-transformers/all-mpnet-base-v2"
-    )
-    collection = client.create_collection("generic_bot", embedding_function=ef)
+def build_faiss_index(docs):
+    embed_model = load_embedding_model()
     texts = [doc.page_content for doc in docs]
-    ids   = [str(i) for i in range(len(texts))]
-    collection.add(documents=texts, ids=ids)
-    return collection
+    embeddings = embed_model.encode(texts, convert_to_numpy=True).astype("float32")
+    faiss.normalize_L2(embeddings)
+    index = faiss.IndexFlatIP(embeddings.shape[1])
+    index.add(embeddings)
+    return index, texts
 
 
-def create_prompt_template():
-    template = """You are a finance consultant chatbot. Answer the customer's questions only using the source data provided.
+def retrieve(query, index, texts, k=3):
+    embed_model = load_embedding_model()
+    q_vec = embed_model.encode([query], convert_to_numpy=True).astype("float32")
+    faiss.normalize_L2(q_vec)
+    _, indices = index.search(q_vec, k)
+    return "\n".join(texts[i] for i in indices[0] if i < len(texts))
+
+
+PROMPT_TEMPLATE = """You are a finance consultant chatbot. Answer the customer's questions only using the source data provided.
 Please answer to their specific questions. If you are unsure, say "I don't know, please call our customer support". Keep your answers concise.
 
 {context}
 
 Question: {question}
 Answer:"""
-    return template
-
-
-def create_retrieval_chain(model, collection, prompt_template):
-    """Returns a callable that retrieves context then calls the LLM."""
-    def run(query):
-        results  = collection.query(query_texts=[query], n_results=3)
-        context  = "\n".join(results["documents"][0])
-        filled   = prompt_template.format(context=context, question=query)
-        return model.invoke(filled).content
-    return run
-
-
-def query_chain(chain, query):
-    return chain(query)
 
 
 @st.cache_resource
 def get_bot_chain():
-    model          = load_groq_model()
-    docs           = docs_preprocessing_helper(data_path("generic.csv"))
-    collection     = setup_chroma_db(docs)
-    prompt         = create_prompt_template()
-    return create_retrieval_chain(model, collection, prompt)
+    """Build FAISS index and return a callable. Cached for the app lifetime — safe across tab switches."""
+    docs         = docs_preprocessing_helper(data_path("generic.csv"))
+    index, texts = build_faiss_index(docs)
+    model        = load_groq_model()
+
+    def run(query):
+        context = retrieve(query, index, texts)
+        filled  = PROMPT_TEMPLATE.format(context=context, question=query)
+        return model.invoke(filled).content
+
+    return run
 
 # ============================================================
 # STREAMLIT PAGE
 # ============================================================
 
 def bot_page():
-    """Bot section of the landing page."""
     st.markdown("""
     <style>
     * { font-family: Verdana, sans-serif !important; }
@@ -126,11 +122,8 @@ def bot_page():
     if "messages" not in st.session_state:
         st.session_state.messages = []
 
-    # Only build the chain once — reuse it across tab switches
-    if "chain" not in st.session_state:
-        st.session_state.chain = get_bot_chain()
+    chain = get_bot_chain()
 
-    # Display existing messages
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
             if message["role"] == "assistant":
@@ -141,7 +134,6 @@ def bot_page():
             else:
                 st.markdown(message["content"])
 
-    # Handle new input
     if user_input := st.chat_input("How can I assist you today?"):
         st.session_state.messages.append({"role": "user", "content": user_input})
         with st.chat_message("user"):
@@ -150,7 +142,7 @@ def bot_page():
         with st.chat_message("assistant"):
             placeholder = st.empty()
             with st.spinner("Thinking..."):
-                response = query_chain(st.session_state.chain, user_input)
+                response = chain(user_input)
             placeholder.markdown(
                 f'<div style="color:white;">{response}</div>',
                 unsafe_allow_html=True,

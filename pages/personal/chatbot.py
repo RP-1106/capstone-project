@@ -6,6 +6,8 @@ from langchain_text_splitters import CharacterTextSplitter
 from langchain_community.document_loaders import CSVLoader
 from langchain_core.prompts import PromptTemplate
 from langchain_groq import ChatGroq
+from sentence_transformers import SentenceTransformer
+import faiss
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -13,7 +15,7 @@ import logging
 logging.getLogger("transformers").setLevel(logging.ERROR)
 
 # ============================================================
-# SECRETS: Read from Streamlit secrets (cloud) or .env (local)
+# SECRETS
 # ============================================================
 
 def get_secret(key, section=None):
@@ -35,7 +37,7 @@ mysql_config = {
 }
 
 # ============================================================
-# CACHED MODEL
+# CACHED MODEL + EMBEDDINGS
 # ============================================================
 
 @st.cache_resource
@@ -46,11 +48,11 @@ def load_groq_model():
         groq_api_key=GROQ_API_KEY,
     )
 
-model = load_groq_model()
+@st.cache_resource
+def load_embedding_model():
+    return SentenceTransformer("sentence-transformers/all-mpnet-base-v2")
 
-# ============================================================
-# CROSS-PLATFORM PATH HELPER
-# ============================================================
+model = load_groq_model()
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -58,17 +60,15 @@ def data_path(*parts):
     return os.path.join(BASE_DIR, "data", *parts)
 
 # ============================================================
-# DATABASE CONFIG & INITIALISATION
+# DATABASE
 # ============================================================
 
 def initialize_database():
     init_config = {k: v for k, v in mysql_config.items() if k != "database"}
     mycon = sql.connect(**init_config)
     cursor = mycon.cursor()
-
     cursor.execute(f"CREATE DATABASE IF NOT EXISTS {mysql_config['database']}")
     cursor.execute(f"USE {mysql_config['database']}")
-
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS Capstone (
             Date            DATE,
@@ -80,10 +80,8 @@ def initialize_database():
             Transaction_id  VARCHAR(50) PRIMARY KEY
         )
     """)
-
     cursor.execute("SELECT COUNT(*) FROM Capstone")
     count = cursor.fetchone()[0]
-
     csv_file = data_path("dummy1.csv")
     if count == 0 and os.path.exists(csv_file):
         df = pd.read_csv(csv_file)
@@ -98,13 +96,11 @@ def initialize_database():
                 mysql_date, row["Mode"], row["Category"], row["Remark"],
                 float(row["Amount"]), row["Income_Expense"], row["Transaction_id"],
             ))
-
         insert_sql = """INSERT IGNORE INTO Capstone
                         (Date, Mode, Category, Remark, Amount, Income_Expense, Transaction_id)
                         VALUES (%s, %s, %s, %s, %s, %s, %s)"""
         cursor.executemany(insert_sql, records)
         mycon.commit()
-
     mycon.close()
 
 # ============================================================
@@ -159,13 +155,10 @@ def natural_language_interpretation(original_question, sql_query, columns, resul
         and result[0].startswith("Error:")
     ):
         return "I couldn't find any information matching your query."
-
     if len(result) == 1:
         try:
-            return generate_sql_to_english_response(
-                original_question, sql_query, columns, result
-            )
-        except Exception as e:
+            return generate_sql_to_english_response(original_question, sql_query, columns, result)
+        except Exception:
             row = result[0]
             if len(columns) == 1 and len(row) == 1:
                 return f"The result is: {row[0]}"
@@ -173,20 +166,13 @@ def natural_language_interpretation(original_question, sql_query, columns, resul
             for col, val in zip(columns, row):
                 description += f"- **{col}**: {val}\n"
             return description
-
     if len(columns) == 1 and len(result[0]) == 1:
         try:
-            return generate_sql_to_english_response(
-                original_question, sql_query, columns, result
-            )
-        except Exception as e:
+            return generate_sql_to_english_response(original_question, sql_query, columns, result)
+        except Exception:
             return f"Amount corresponding to the query sums to {result[0][0]}"
-
     return "Found multiple records. Displaying in table format."
 
-# ============================================================
-# SQL QUERY EXECUTION
-# ============================================================
 
 def read_sql_query(sql_query, db_config):
     try:
@@ -194,9 +180,7 @@ def read_sql_query(sql_query, db_config):
         cursor = mycon.cursor()
         cursor.execute(sql_query)
         rows = cursor.fetchall()
-        columns = (
-            [col[0] for col in cursor.description] if cursor.description else []
-        )
+        columns = [col[0] for col in cursor.description] if cursor.description else []
         cursor.close()
         mycon.close()
         return rows, columns
@@ -248,11 +232,9 @@ IMPORTANT DISTINCTION:
 
 IMPORTANT ABOUT CASE SENSITIVITY:
 - Always use LOWER() function when performing text comparisons to make searches case-insensitive
-- Example: LOWER(Remark) LIKE LOWER('%kitchen%') instead of Remark LIKE '%Kitchen%'
 
 IMPORTANT ABOUT SEARCH TERMS:
 - When the user asks about transactions related to an item that could appear in either Category OR Remark columns, your query must check BOTH columns using the OR operator
-- Example: For "Show me all milk transactions" use: WHERE LOWER(Category) LIKE LOWER('%milk%') OR LOWER(Remark) LIKE LOWER('%milk%')
 
 IMPORTANT ABOUT DATE HANDLING:
 - The Date column is stored in MySQL's native YYYY-MM-DD format
@@ -302,7 +284,7 @@ def get_mistral_response(question, prompt_template):
     return {"query": response.content, "timing": timing_info}
 
 # ============================================================
-# FINMENTOR — Document QA (pure chromadb, no langchain Chroma wrapper)
+# FINMENTOR — FAISS-based document QA
 # ============================================================
 
 def docs_preprocessing_helper(file):
@@ -312,24 +294,25 @@ def docs_preprocessing_helper(file):
     return text_splitter.split_documents(docs)
 
 
-def setup_chroma_db(docs):
-    """Pure chromadb EphemeralClient — bypasses langchain_community Chroma wrapper entirely."""
-    import chromadb
-    from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
-
-    client = chromadb.EphemeralClient()
-    ef = SentenceTransformerEmbeddingFunction(
-        model_name="sentence-transformers/all-mpnet-base-v2"
-    )
-    collection = client.create_collection("fin_mentor", embedding_function=ef)
+def build_faiss_index(docs):
+    embed_model = load_embedding_model()
     texts = [doc.page_content for doc in docs]
-    ids   = [str(i) for i in range(len(texts))]
-    collection.add(documents=texts, ids=ids)
-    return collection
+    embeddings = embed_model.encode(texts, convert_to_numpy=True).astype("float32")
+    faiss.normalize_L2(embeddings)
+    index = faiss.IndexFlatIP(embeddings.shape[1])
+    index.add(embeddings)
+    return index, texts
 
 
-def create_prompt_template():
-    return """You are a finance consultant chatbot. Answer the customer's questions only using the source data provided.
+def retrieve(query, index, texts, k=3):
+    embed_model = load_embedding_model()
+    q_vec = embed_model.encode([query], convert_to_numpy=True).astype("float32")
+    faiss.normalize_L2(q_vec)
+    _, indices = index.search(q_vec, k)
+    return "\n".join(texts[i] for i in indices[0] if i < len(texts))
+
+
+MENTOR_PROMPT = """You are a finance consultant chatbot. Answer the customer's questions only using the source data provided.
 Please answer to their specific questions. If you are unsure, say "I don't know, please call our customer support". Keep your answers concise.
 
 {context}
@@ -338,25 +321,18 @@ Question: {question}
 Answer:"""
 
 
-def create_retrieval_chain(model, collection, prompt_template):
-    def run(query):
-        results = collection.query(query_texts=[query], n_results=3)
-        context = "\n".join(results["documents"][0])
-        filled  = prompt_template.format(context=context, question=query)
-        return model.invoke(filled).content
-    return run
-
-
-def query_chain(chain, query):
-    return chain(query)
-
-
 @st.cache_resource
 def get_mentor_chain():
-    docs       = docs_preprocessing_helper(data_path("custom.csv"))
-    collection = setup_chroma_db(docs)
-    prompt     = create_prompt_template()
-    return create_retrieval_chain(model, collection, prompt)
+    """Build FAISS index for FinMentor. Cached for app lifetime — safe across tab switches."""
+    docs         = docs_preprocessing_helper(data_path("custom.csv"))
+    index, texts = build_faiss_index(docs)
+
+    def run(query):
+        context = retrieve(query, index, texts)
+        filled  = MENTOR_PROMPT.format(context=context, question=query)
+        return model.invoke(filled).content
+
+    return run
 
 # ============================================================
 # STREAMLIT UI
@@ -388,7 +364,6 @@ def data_digger():
             st.session_state.digger_messages.append(
                 {"query_id": qid, "role": "user", "content": prompt}
             )
-
             with st.spinner("Generating SQL query..."):
                 result    = get_mistral_response(prompt, data_digger_prompt_template)
                 sql_query = result["query"]
@@ -454,15 +429,14 @@ def fin_mentor():
     if "mentor_messages" not in st.session_state:
         st.session_state.mentor_messages = []
 
-    if "mentor_chain" not in st.session_state:
-        st.session_state.mentor_chain = get_mentor_chain()
+    chain = get_mentor_chain()
 
     with input_container:
         prompt = st.chat_input("What is your finance question?")
         if prompt:
             st.session_state.mentor_messages.append({"role": "user", "content": prompt})
             with st.spinner("Thinking..."):
-                response = query_chain(st.session_state.mentor_chain, prompt)
+                response = chain(prompt)
             st.session_state.mentor_messages.append({"role": "assistant", "content": response})
 
     with chat_container:
