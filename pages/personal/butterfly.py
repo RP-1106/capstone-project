@@ -308,8 +308,13 @@ def display_recommendations(df, category_adjustments):
     
     if recommendations:
         for rec in recommendations:
-            with st.expander(rec['title'], expanded=False):
-                st.markdown(rec['content'])
+            st.markdown(f"""
+            <div style='background-color:#2d2d2d; border-left:4px solid #4e807c; 
+                        border-radius:6px; padding:12px 16px; margin-bottom:10px;'>
+                <strong style='color:#78c4be;'>{rec['title']}</strong>
+                <p style='margin-top:8px; margin-bottom:0; color:white;'>{rec['content']}</p>
+            </div>
+            """, unsafe_allow_html=True)
     
     # Generic advice
     st.markdown("<h3 style='margin-top: 20px; margin-bottom: -25px'>General Financial Advice</h3>", unsafe_allow_html=True)

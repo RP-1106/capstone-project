@@ -38,7 +38,8 @@ def upload_data():
     if 'finance_df' not in st.session_state:
         st.session_state.finance_df = None
     
-    uploaded_file = st.file_uploader("Give us your existing financial history data to get started with the financial insights and explore the application features. Alternatively, you can navigate to the Expense or Income page as well, to manually enter transactions from scratch or add new ones as you continue using the app.", type="csv")
+    st.markdown("Give us your existing financial history data to get started with the financial insights and explore the application features. Alternatively, you can navigate to the Expense or Income page as well, to manually enter transactions from scratch or add new ones as you continue using the app.")
+    uploaded_file = st.file_uploader("Upload CSV", type="csv", label_visibility="collapsed")
         
     # Process the uploaded file
     if uploaded_file is not None:
