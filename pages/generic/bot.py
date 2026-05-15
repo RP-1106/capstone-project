@@ -70,16 +70,10 @@ def docs_preprocessing_helper(file):
 def setup_chroma_db(docs, embedding_fn):
     """In-memory Chroma DB using EphemeralClient (no SQLite file needed)."""
     import chromadb
-    from langchain_community.vectorstores import Chroma
-
     client = chromadb.EphemeralClient()
-    texts     = [doc.page_content for doc in docs]
-    metadatas = [doc.metadata for doc in docs]
-
-    return Chroma.from_texts(
-        texts=texts,
+    return Chroma.from_documents(
+        documents=docs,
         embedding=embedding_fn,
-        metadatas=metadatas,
         collection_name="generic_bot",
         client=client,
     )
