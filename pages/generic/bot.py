@@ -11,6 +11,11 @@ from langchain_core.prompts import PromptTemplate
 from langchain_groq import ChatGroq
 from langchain_huggingface import HuggingFaceEmbeddings
 
+import warnings
+warnings.filterwarnings("ignore")
+import logging
+logging.getLogger("transformers").setLevel(logging.ERROR)
+
 # ============================================================
 # SECRETS: Read from st.secrets (cloud) or env vars (local)
 # ============================================================
@@ -70,6 +75,14 @@ def setup_chroma_db(docs, embedding_fn):
         collection_name="generic_bot",
     )
 
+@st.cache_resource
+def get_bot_chain():
+    model              = load_groq_model()
+    embedding_function = load_embedding_function()
+    docs               = docs_preprocessing_helper(data_path("generic.csv"))
+    db                 = setup_chroma_db(docs, embedding_function)
+    prompt             = create_prompt_template()
+    return create_retrieval_chain(model, db, prompt)
 
 def create_prompt_template():
     template = """You are a finance consultant chatbot. Answer the customer's questions only using the source data provided.
@@ -117,14 +130,7 @@ def bot_page():
         st.session_state.messages = []
 
     # Load model + chain once per session
-    if "chain" not in st.session_state:
-        with st.spinner("Loading model and data (this will only happen once)..."):
-            model              = load_groq_model()
-            embedding_function = load_embedding_function()
-            docs               = docs_preprocessing_helper(data_path("generic.csv"))
-            db                 = setup_chroma_db(docs, embedding_function)
-            prompt             = create_prompt_template()
-            st.session_state.chain = create_retrieval_chain(model, db, prompt)
+    st.session_state.chain = get_bot_chain()
 
     # Display existing messages
     for message in st.session_state.messages:

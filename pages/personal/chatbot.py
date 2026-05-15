@@ -13,6 +13,11 @@ from langchain_core.prompts import PromptTemplate
 from langchain_groq import ChatGroq
 from langchain_huggingface import HuggingFaceEmbeddings
 
+import warnings
+warnings.filterwarnings("ignore")
+import logging
+logging.getLogger("transformers").setLevel(logging.ERROR)
+
 # ============================================================
 # SECRETS: Read from Streamlit secrets (cloud) or .env (local)
 # ============================================================
@@ -345,6 +350,14 @@ def setup_chroma_db(docs, embedding_fn, persist_directory):
         os.makedirs(persist_directory)
     return Chroma.from_documents(docs, embedding_fn, persist_directory=persist_directory)
 
+@st.cache_resource
+def get_mentor_chain():
+    file_path      = data_path("custom.csv")
+    docs           = docs_preprocessing_helper(file_path)
+    mentor_persist = os.path.join(BASE_DIR, "chroma_fin_mentor")
+    db             = setup_chroma_db(docs, embedding_function, mentor_persist)
+    prompt         = create_prompt_template()
+    return create_retrieval_chain(model, db, prompt)
 
 def create_prompt_template():
     template = """You are a finance consultant chatbot. Answer the customer's questions only using the source data provided.
@@ -468,14 +481,7 @@ def fin_mentor():
     if "mentor_messages" not in st.session_state:
         st.session_state.mentor_messages = []
 
-    if "mentor_chain" not in st.session_state:
-        with st.spinner("Loading model and data (this will only happen once)..."):
-            file_path        = data_path("custom.csv")
-            docs             = docs_preprocessing_helper(file_path)
-            mentor_persist   = os.path.join(BASE_DIR, "chroma_fin_mentor")
-            db               = setup_chroma_db(docs, embedding_function, mentor_persist)
-            prompt           = create_prompt_template()
-            st.session_state.mentor_chain = create_retrieval_chain(model, db, prompt)
+    st.session_state.mentor_chain = get_mentor_chain()
 
     with input_container:
         prompt = st.chat_input("What is your finance question?")
