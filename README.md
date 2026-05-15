@@ -180,4 +180,4 @@ For more screenshots, see the `output/` folder.
 ---
 
 ## Original Project
-This fork is based on the original capstone project by [@shrutishrinivasan](https://github.com/shrutishrinivasan/capstone-project). All core application logic, UI design, and feature set are the work of the original team.
+This fork is based on the original capstone project at (https://github.com/shrutishrinivasan/capstone-project). All core application logic, UI design, and feature set are the work of the original team.
