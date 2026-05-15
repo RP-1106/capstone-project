@@ -200,7 +200,7 @@ def getting_started():
     </div>
     """, unsafe_allow_html=True)
 
-    gsflow = get_base64_image("static/gsflow.PNG")
+    gsflow = get_base64_image("static/gsflow.png")
     st.markdown(f"""
     <div class="screenshot-container">
         <img src="data:image/png;base64,{gsflow}" alt="Upload Data Section" width="90%">
@@ -218,7 +218,7 @@ def getting_started():
     </p>
     """, unsafe_allow_html=True)
     
-    upload = get_base64_image("static/upload.PNG")
+    upload = get_base64_image("static/upload.png")
     st.markdown(f"""
     <div class="screenshot-container">
         <img src="data:image/png;base64,{upload}" alt="Upload Data Section" width="95%">
@@ -298,7 +298,7 @@ def getting_started():
     </p>
     """, unsafe_allow_html=True)
     
-    overview = get_base64_image("static/overview.PNG")
+    overview = get_base64_image("static/overview.png")
     st.markdown(f"""
     <div class="screenshot-container">
         <img src="data:image/png;base64,{overview}" alt="Overview Dashboard" width="100%">
@@ -335,7 +335,7 @@ def getting_started():
     </p>
     """, unsafe_allow_html=True)
     
-    record = get_base64_image("static/record.PNG")
+    record = get_base64_image("static/record.png")
     st.markdown(f"""
     <div class="screenshot-container">
         <img src="data:image/png;base64,{record}" alt="Income/Expense Section" width="90%">
@@ -497,7 +497,7 @@ def getting_started():
     </p>
     """, unsafe_allow_html=True)
     
-    custom = get_base64_image("static/chat.PNG")
+    custom = get_base64_image("static/chat.png")
     st.markdown(f"""
     <div class="screenshot-container">
         <img src="data:image/png;base64,{custom}" alt="Custom Bot Interface" width="100%">

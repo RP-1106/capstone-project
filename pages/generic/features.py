@@ -43,7 +43,7 @@ def features_page():
     </div>
     """, unsafe_allow_html=True)
     
-    st.image("static/chat.PNG", caption="AI Assistant Dashboard", use_container_width=True)
+    st.image("static/chat.png", caption="AI Assistant Dashboard", use_container_width=True)
     
     # Feature 2: Butterfly Effect Model
     st.markdown("""
